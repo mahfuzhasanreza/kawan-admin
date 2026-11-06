@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { SERVER_URL } from '../config';
 import { FaEnvelope, FaTrashAlt, FaCheckCircle, FaReply, FaCheck } from "react-icons/fa";
 import { motion } from "framer-motion";
 import axios from "axios";
@@ -12,7 +13,7 @@ const ContactManagement = () => {
   useEffect(() => {
     const fetchContacts = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/contact");
+        const response = await axios.get(`${SERVER_URL}/contact`);
         setContacts(response.data);
         setLoading(false);
       } catch (err) {
@@ -26,7 +27,7 @@ const ContactManagement = () => {
 
   const handleDelete = async (email) => {
     try {
-      await axios.delete(`http://localhost:5000/contact/${email}`);
+      await axios.delete(`${SERVER_URL}/contact/${email}`);
       setContacts((prev) => prev.filter((contact) => contact.email !== email));
       setSelectedContact(null);
     } catch (error) {

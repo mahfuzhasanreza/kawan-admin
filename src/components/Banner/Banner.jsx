@@ -1,4 +1,5 @@
 import Lottie from 'lottie-react';
+import { SERVER_URL } from '../../config';
 import bannerLottieData from '../../assets/lottie/banner.json';
 import { TypeAnimation } from 'react-type-animation';
 import { AuthContext } from '../../providers/AuthProvider';
@@ -15,7 +16,7 @@ const Banner = () => {
 
         const checkProfessionalStatus = async () => {
             try {
-                const response = await fetch(`http://localhost:5000/professionals/${userDb.email}`, {
+                const response = await fetch(`${SERVER_URL}/professionals/${userDb.email}`, {
                     method: "GET",
                 });
 

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { SERVER_URL } from '../../config';
 import { FaCheckCircle, FaTrash } from 'react-icons/fa'; // Importing icons
 import axios from 'axios'; // For making HTTP requests
 
@@ -11,7 +12,7 @@ const AdminProfessionalVerify = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await axios.get('http://localhost:5000/req-professionals');
+                const response = await axios.get(`${SERVER_URL}/req-professionals`);
                 setData(response.data);
                 setLoading(false);
             } catch (error) {
@@ -25,7 +26,7 @@ const AdminProfessionalVerify = () => {
     const handleVerify = async (email, selectedItem) => {
         try {
             // Step 1: Send the PUT request to accept the professional
-            const response = await axios.put(`http://localhost:5000/accept-professionals/${email}`);
+            const response = await axios.put(`${SERVER_URL}/accept-professionals/${email}`);
             console.log("Verification successful", response.data);
     
             // Step 2: Update the state to reflect the change
@@ -36,7 +37,7 @@ const AdminProfessionalVerify = () => {
             );
     
             // Step 3: Send data to the backend to store it in the database
-            await axios.post('http://localhost:5000/professionals-manage', selectedItem);
+            await axios.post(`${SERVER_URL}/professionals-manage`, selectedItem);
     
             // Optionally handle any response from the post request if needed
             console.log("Professional accepted and stored successfully");
@@ -56,7 +57,7 @@ const AdminProfessionalVerify = () => {
 
         try {
             // Delete the professional from the 'req-professionals' collection
-            await axios.delete(`http://localhost:5000/req-professionals/${selectedEmail}`);
+            await axios.delete(`${SERVER_URL}/req-professionals/${selectedEmail}`);
 
             // Remove the deleted item from state
             setData((prevData) => prevData.filter(item => item.email !== selectedEmail));

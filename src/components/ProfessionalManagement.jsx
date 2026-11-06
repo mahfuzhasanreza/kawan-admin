@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { SERVER_URL } from '../config';
 import { FaCheckCircle, FaTrash } from 'react-icons/fa'; // Importing icons
 import axios from 'axios'; // For making HTTP requests
 
@@ -11,7 +12,7 @@ const ProfessionalManagement = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await axios.get('http://localhost:5000/verify-professionals-list');
+                const response = await axios.get(`${SERVER_URL}/verify-professionals-list`);
                 setData(response.data);
                 setLoading(false);
             } catch (error) {
@@ -25,7 +26,7 @@ const ProfessionalManagement = () => {
     const handleVerify = async (email, selectedItem) => {
         try {
             // Step 1: Send the PUT request to accept the professional
-            const response = await axios.put(`http://localhost:5000/accept-professionals/${email}`);
+            const response = await axios.put(`${SERVER_URL}/accept-professionals/${email}`);
             console.log("Verification successful", response.data);
     
             // Step 2: Update the state to reflect the change
@@ -36,7 +37,7 @@ const ProfessionalManagement = () => {
             );
     
             // Step 3: Send data to the backend to store it in the database
-            await axios.post('http://localhost:5000/professionals-manage', selectedItem);
+            await axios.post(`${SERVER_URL}/professionals-manage`, selectedItem);
     
             // Optionally handle any response from the post request if needed
             console.log("Professional accepted and stored successfully");
@@ -55,9 +56,9 @@ const ProfessionalManagement = () => {
         if (!selectedEmail) return;
 
         try {
-            await axios.put(`http://localhost:5000/delete-professionals/${selectedEmail}`);
+            await axios.put(`${SERVER_URL}/delete-professionals/${selectedEmail}`);
             // Delete the professional from the 'req-professionals' collection
-            await axios.delete(`http://localhost:5000/professionals-manage/${selectedEmail}`);
+            await axios.delete(`${SERVER_URL}/professionals-manage/${selectedEmail}`);
 
             // Remove the deleted item from state
             setData((prevData) => prevData.filter(item => item.email !== selectedEmail));

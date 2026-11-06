@@ -1,4 +1,5 @@
 import { updateProfile } from 'firebase/auth';
+import { SERVER_URL } from '../../config';
 import { auth } from '../../firebase.init';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
@@ -70,7 +71,7 @@ const Register = () => {
                 if (userType === 'professional') {
                     console.log("YESS");
                     try {
-                        fetch("http://localhost:5000/professionals", {
+                        fetch(`${SERVER_URL}/professionals`, {
                             method: "POST",
                             headers: {
                                 "Content-Type": "application/json",

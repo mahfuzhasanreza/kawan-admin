@@ -1,4 +1,5 @@
 import { Link, useNavigate, useLocation } from "react-router-dom";
+import { SERVER_URL } from '../../config';
 import { Toaster } from 'react-hot-toast';
 import { useContext, useEffect, useRef, useState } from "react";
 import { AuthContext } from "../../providers/AuthProvider";
@@ -22,7 +23,7 @@ const Navbar = () => {
 
         const checkProfessionalStatus = async () => {
             try {
-                const response = await fetch(`http://localhost:5000/professionals/${userDb.email}`, {
+                const response = await fetch(`${SERVER_URL}/professionals/${userDb.email}`, {
                     method: "GET",
                 });
 
