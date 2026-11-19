@@ -12,7 +12,7 @@ import loginLottieData from '../../assets/lottie/login.json';
 const Login = () => {
     const navigate = useNavigate();
     const location = useLocation();
-    const { signInUser, signInWithGoogle, userType } = useContext(AuthContext);
+    const { signInUser, signInWithGoogle, signInAsGuest, userType } = useContext(AuthContext);
     const [success, setSuccess] = useState(false);
     const emailRef = useRef();
 
@@ -51,6 +51,15 @@ const Login = () => {
         navigate('/forget-password', { state: { inputEmail: email } });
     };
 
+
+    const handleGuestLogin = async () => {
+        try {
+            await signInAsGuest();
+            navigate(location?.state ? location.state : '/');
+        } catch (error) {
+            // toast already shown in AuthProvider
+        }
+    };
 
     const handleGoogleLogin = async () => {
         try {
@@ -146,6 +155,11 @@ const Login = () => {
                         </form>
 
                         {success && <p className="text-green-500 text-center mt-4">Login successful!</p>}
+
+                        <button type="button" onClick={handleGuestLogin}
+                            className='btn bg-yellow-300 hover:bg-yellow-400 border-none text-gray-800 text-lg font-semibold mt-4'>
+                            Continue as Guest (Demo)</button>
+                        <p className='text-center text-xs text-gray-500 mt-2'>No sign-up needed — explore with a shared demo account.</p>
                        
 
                     </div>
