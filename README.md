@@ -18,6 +18,7 @@
 
 - [Overview](#overview)
 - [Live Demo](#live-demo)
+- [Screenshots](#screenshots)
 - [Features](#features)
 - [Tech Stack](#tech-stack)
 - [Architecture](#architecture)
@@ -28,7 +29,9 @@
 - [Getting Started](#getting-started)
 - [Environment Variables](#environment-variables)
 - [Deployment](#deployment)
+- [Known Limitations](#known-limitations)
 - [Related Repositories](#related-repositories)
+- [License](#license)
 - [Author](#author)
 
 ---
@@ -37,7 +40,7 @@
 
 KAWAN only lets **verified** professionals offer counselling to users. `kawan-admin` is the back-office app where administrators:
 
-1. review verification requests submitted by professionals in [kawan-client](https://github.com/mahfuzhasanreza/kawan-client),
+1. review verification requests from professionals (degree details, documents, portfolio and LinkedIn links),
 2. **approve or reject** them, and revoke verification later if needed,
 3. browse registered users, and
 4. read and clear "Contact Us" messages.
@@ -56,16 +59,22 @@ All data operations go through [kawan-server](https://github.com/mahfuzhasanreza
 
 ---
 
+## Screenshots
+
+![KAWAN admin dashboard](docs/screenshots/dashboard.jpg)
+
+---
+
 ## Features
 
-| | Module | What the admin can do |
-|---|---|---|
-| 🏠 | **Dashboard** | Cards that link to every admin module |
-| ✅ | **Professional Verification** | See pending requests → **Accept** (marks `isVerify: true` and adds to the verified list) or **Reject** (removes the request) |
-| 🧑‍⚕️ | **Professional Management** | See all verified professionals → **Revoke** verification |
-| 👥 | **User List** | Browse registered users |
-| ✉️ | **Manage Contact** | Read and delete messages sent from the client's Contact Us page |
-| 🔐 | **Auth** | Firebase email/password and Google login, guest demo login; every admin page is behind `PrivateRoute` |
+| Module | What the admin can do |
+|---|---|
+| **Dashboard** | Cards that link to every admin module |
+| **Professional Verification** | See pending requests → **Accept** (marks `isVerify: true` and adds to the verified list) or **Reject** (removes the request) |
+| **Professional Management** | See all verified professionals → **Revoke** verification |
+| **User List** | Browse registered users |
+| **Manage Contact** | Read and delete messages sent from the client's Contact Us page |
+| **Auth** | Firebase email/password and Google login, guest demo login; every admin page is behind `PrivateRoute` |
 
 ---
 
@@ -87,14 +96,14 @@ All data operations go through [kawan-server](https://github.com/mahfuzhasanreza
 
 ```mermaid
 flowchart LR
-    AD(("🛡️ Admin"))
+    AD(("Admin"))
     subgraph Browser
         APP["<b>kawan-admin</b><br/>React SPA"]
     end
-    FB["🔥 Firebase Auth"]
-    KS["⚙️ kawan-server<br/>Express"]
-    DB[("🍃 MongoDB Atlas<br/>kawanDB")]
-    KR["🗂️ KAWAN REST API<br/>/api/v1/user"]
+    FB["Firebase Auth"]
+    KS["kawan-server<br/>Express"]
+    DB[("MongoDB Atlas<br/>kawanDB")]
+    KR["KAWAN REST API<br/>/api/v1/user"]
 
     AD --> APP
     APP -->|"login"| FB
@@ -130,13 +139,13 @@ flowchart TB
 ```mermaid
 sequenceDiagram
     autonumber
-    participant P as 🧑‍⚕️ Professional (kawan-client)
-    participant S as ⚙️ kawan-server
-    participant A as 🛡️ Admin (kawan-admin)
-    participant U as 👤 User (kawan-client)
+    participant P as Professional (kawan-client)
+    participant S as kawan-server
+    participant A as Admin (kawan-admin)
+    participant U as User (kawan-client)
 
     P->>S: POST /professionals { isVerify:false }
-    P->>S: POST /professionals-verify-request
+    Note over P,S: Verification request (degree, Drive, portfolio, LinkedIn links)<br/>POST /professionals-verify-request, which has no client form yet
     A->>S: GET /req-professionals
     S-->>A: Pending requests
     alt Accept
@@ -148,7 +157,6 @@ sequenceDiagram
     end
     P->>S: GET /professionals/:email
     S-->>P: status 2 → dashboard unlocked
-    U->>P: Can now book a counselling session
 ```
 
 ### Revoking a professional
@@ -170,10 +178,10 @@ flowchart LR
 |---|---|---|
 | `/` | Home: dashboard cards | Public |
 | `/login` | Login (email, Google, guest) | Public |
-| `/professional-verification` | Pending verification requests | 🔒 |
-| `/professional-management` | Verified professionals | 🔒 |
-| `/user-list` | Registered users | 🔒 |
-| `/manage-contact` | Contact messages | 🔒 |
+| `/professional-verification` | Pending verification requests | Login required |
+| `/professional-management` | Verified professionals | Login required |
+| `/user-list` | Registered users | Login required |
+| `/manage-contact` | Contact messages | Login required |
 
 ---
 
@@ -188,7 +196,7 @@ flowchart LR
 | Navbar / Banner | `GET /professionals/:email` (role badge) | kawan-server |
 | User list | `GET /api/v1/user` | KAWAN REST API |
 
-See the full endpoint list in the [kawan-server README](https://github.com/mahfuzhasanreza/kawan-server#api-reference).
+See every endpoint in the [kawan-server API reference](https://github.com/mahfuzhasanreza/kawan-server/blob/main/docs/API.md).
 
 ---
 
@@ -196,6 +204,7 @@ See the full endpoint list in the [kawan-server README](https://github.com/mahfu
 
 ```
 kawan-admin/
+├── docs/screenshots/               # Images used in this README
 ├── public/
 ├── src/
 │   ├── main.jsx                     # Router + providers
@@ -271,7 +280,7 @@ VITE_GUEST_PASSWORD=********
 flowchart LR
     S["Source"] -- "npm run build" --> D["dist/"]
     D -- "vercel --prod" --> V["▲ kawan-console.vercel.app"]
-    D -. "firebase deploy (optional)" .-> F["🔥 Firebase Hosting"]
+    D -. "firebase deploy (optional)" .-> F["Firebase Hosting"]
 ```
 
 ```bash
@@ -284,6 +293,14 @@ Remember to keep the admin domain in kawan-server's `CORS_ORIGINS`.
 
 ---
 
+## Known Limitations
+
+- **No admin role check.** `PrivateRoute` only checks that someone is logged in, so any account, including the public guest account, can open every admin page. The server's admin endpoints are not protected either. Admin access should be limited to an allow-list or a Firebase custom claim, and the server should check it too.
+- **The verification queue is fed manually.** The client's verification form is not built yet, so requests reach `verify-request` only when they are inserted directly into the database.
+- **No automated tests.**
+
+---
+
 ## Related Repositories
 
 | Repo | Description |
@@ -292,6 +309,12 @@ Remember to keep the admin domain in kawan-server's `CORS_ORIGINS`.
 | [kawan-client](https://github.com/mahfuzhasanreza/kawan-client) | User and professional web app |
 | **kawan-admin** | ← you are here |
 | [kawan-server](https://github.com/mahfuzhasanreza/kawan-server) | Express + MongoDB API |
+
+---
+
+## License
+
+Released under the [MIT License](LICENSE).
 
 ---
 
