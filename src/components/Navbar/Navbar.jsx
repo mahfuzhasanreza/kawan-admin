@@ -1,196 +1,164 @@
-import { Link, useNavigate, useLocation } from "react-router-dom";
-import { SERVER_URL } from '../../config';
+import { Link, NavLink, useLocation } from "react-router-dom";
 import { Toaster } from 'react-hot-toast';
 import { useContext, useEffect, useRef, useState } from "react";
 import { AuthContext } from "../../providers/AuthProvider";
 import logo from '../../assets/kawanLogoMsg.png';
-import { FaChevronDown } from 'react-icons/fa';
+import { HiMenu, HiX } from 'react-icons/hi';
+import Avatar from "../Avatar/Avatar";
+
+const NAV_LINKS = [
+    { to: '/', label: 'Home', end: true },
+    { to: '/user-list', label: 'User Management' },
+    { to: '/professional-verification', label: 'Professional Verification' },
+    { to: '/professional-management', label: 'Professional Management' },
+    { to: '/manage-contact', label: 'Contact Messages' },
+];
+
+const desktopLinkClass = ({ isActive }) =>
+    `whitespace-nowrap font-semibold transition-colors hover:text-yellow-200 ${isActive ? 'text-yellow-300' : ''}`;
+
+const mobileLinkClass = ({ isActive }) =>
+    `block rounded-lg px-4 py-2 font-medium ${isActive ? 'bg-fuchsia-100 text-fuchsia-700' : 'text-gray-700 hover:bg-gray-100'}`;
 
 const Navbar = () => {
-    const navigate = useNavigate();
     const location = useLocation();
-    const { userDb, user, signOutUser, theme, setTheme } = useContext(AuthContext);
-    const [isHovered, setIsHovered] = useState(false);
-    const [isProfileShow, setIsProfileShow] = useState(false);
+    const { user, signOutUser, theme } = useContext(AuthContext);
     const [isScrolled, setIsScrolled] = useState(false);
-    const [userType, setUserType] = useState('user');
-
-
-    const userName = user?.displayName;
-
-
-    useEffect(() => {
-
-        const checkProfessionalStatus = async () => {
-            try {
-                const response = await fetch(`${SERVER_URL}/professionals/${userDb.email}`, {
-                    method: "GET",
-                });
-
-                if (!response.ok) {
-                    throw new Error(`Error: ${response.statusText}`);
-                }
-
-                const data = await response.json();
-                console.log(data, "Professional data");
-
-                if (data.status === 2) {
-                    setUserType('professional');
-
-                    console.log("Verified Professional");
-                } else if (data.status === 1) {
-                    setUserType('professional');
-
-                    console.log("Unverified ==== Professional");
-                } else if (data.status === 0) {
-                    setUserType('user');
-
-                    console.log("Regular User");
-                }
-            } catch (error) {
-                console.error("Error fetching professional status:", error);
-            }
-
-        };
-
-        checkProfessionalStatus();
-    }, [userDb]);
-
-    const handleSignOutUser = () => {
-        signOutUser()
-            .then(() => { });
-    };
-
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [isProfileOpen, setIsProfileOpen] = useState(false);
     const profileRef = useRef(null);
-    useEffect(() => {
-        const handleClickOutside = (event) => {
-            if (profileRef.current && !profileRef.current.contains(event.target)) {
-                setIsProfileShow(false);
-            }
-        };
-        document.addEventListener('click', handleClickOutside);
-        return () => {
-            document.removeEventListener('click', handleClickOutside);
-        };
-    }, []);
 
     useEffect(() => {
         document.querySelector('html').setAttribute('data-theme', theme);
     }, [theme]);
 
     useEffect(() => {
-        const handleScroll = () => {
-            setIsScrolled(window.scrollY > 0);
-        };
-
-        window.addEventListener("scroll", handleScroll);
-        return () => window.removeEventListener("scroll", handleScroll);
+        const handleScroll = () => setIsScrolled(window.scrollY > 0);
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
+    // Close menus when the route changes.
+    useEffect(() => {
+        setIsMenuOpen(false);
+        setIsProfileOpen(false);
+    }, [location.pathname]);
+
+    // Close the profile menu on outside click or Escape.
+    useEffect(() => {
+        const handleClick = (event) => {
+            if (profileRef.current && !profileRef.current.contains(event.target)) setIsProfileOpen(false);
+        };
+        const handleKey = (event) => {
+            if (event.key === 'Escape') {
+                setIsProfileOpen(false);
+                setIsMenuOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClick);
+        document.addEventListener('keydown', handleKey);
+        return () => {
+            document.removeEventListener('mousedown', handleClick);
+            document.removeEventListener('keydown', handleKey);
+        };
+    }, []);
+
+    const handleSignOut = () => {
+        setIsProfileOpen(false);
+        signOutUser();
+    };
+
     return (
-        <div
-            className={`navbar text-white lg:px-10 mx-auto max-w-[5000px] sticky top-0 z-50 backdrop-blur-lg shadow-md
-                bg-fuchsia-600 transition-opacity duration-300 ${isScrolled ? "bg-opacity-80" : "bg-opacity-100"
-                }`}
+        <header
+            className={`sticky top-0 z-50 bg-fuchsia-600 text-white shadow-md backdrop-blur-lg transition-colors duration-300 ${isScrolled ? 'bg-opacity-90' : 'bg-opacity-100'}`}
         >
             <Toaster />
-            <div className="navbar-start">
-                <div className="dropdown">
-                    <div tabIndex={0} role="button" className="font-semibold lg:hidden mx-1 lg:mx-3">
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="h-5 w-5"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                        >
-                            <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth="2"
-                                d="M4 6h16M4 12h8m-8 6h16"
-                            />
-                        </svg>
-                    </div>
-                    <ul
-                        tabIndex={0}
-                        className="menu menu-sm dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-52 p-2 shadow"
-                    >
-                        <li><Link className="text-black" to="/">Home</Link></li>
-                        {
-                            userType !== 'professional' && (<li><Link className="text-black" to="/professional-support">User Management</Link></li>)
-                        }
-                        {
-                            userType === 'professional' && (<li><Link className="text-black" to="/user-list">User Management</Link></li>)
-                        }
-                        <li><Link className="text-black" to="/professional-verification">Professional Verification</Link></li>
-                        <li><Link className="text-black" to="/professional-management">Professional Management</Link></li>
-
-                        <li><Link className="text-black" to="/manage-contact">Manage Contact Us Section</Link></li>
-
-
-                        {/* <li><Link className="text-black" to="/meditation">Meditation</Link></li>
-                        <li><Link className="text-black" to="/game/tic-tac">TicTacToe</Link></li>
-                        <li><Link className="text-black" to="/game/fifteen-puzzle">15 Puzzle</Link></li>
-                        <li><Link className="text-black" to="/game/kawan-puzzle">Kawan Puzzle</Link></li>
-                        <li><Link className="text-black" to="/contact-us">Contact Us</Link></li> */}
-
-
-                    </ul>
-                </div>
-                <Link to="/">
-                    <img className="w-9 lg:w-16 lg:mr-0" src={logo} alt="" />
-                </Link>
-                <Link to="/" className="hidden lg:block font-semibold text-sm lg:text-xl ml-0 lg:ml-5">Kawan</Link>
-            </div>
-            <div className="navbar-end lg:w-full gap-2 lg:gap-10">
-                <Link to="/">
-                    <button className={`hidden lg:flex font-semibold ${location.pathname === '/' ? 'text-yellow-300' : ''}`}>Home</button>
+            <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 lg:h-20 lg:px-8">
+                {/* Brand */}
+                <Link to="/" className="flex shrink-0 items-center gap-3">
+                    <img className="h-10 w-10 object-contain lg:h-12 lg:w-12" src={logo} alt="Kawan logo" />
+                    <span className="text-xl font-bold tracking-wide">
+                        Kawan <span className="font-medium text-yellow-200">Admin</span>
+                    </span>
                 </Link>
 
-                {
-                    userType !== 'professional' && (<Link to="/user-list">
-                        <button className={`hidden lg:flex font-semibold   w-full ${location.pathname === '/user-list' ? 'text-yellow-300' : ''}`}>User Management</button>
-                    </Link>)
-                }
-                {
-                    userType === 'professional' && (<Link to="/user-list">
-                        <button className={`hidden lg:flex font-semibold   w-full ${location.pathname === '/user-list' ? 'text-yellow-300' : ''}`}>User Management</button>
-                    </Link>)
-                }
-
-                <Link to="/professional-verification">
-                    <button className={`hidden lg:flex font-semibold w-full ${location.pathname === '/professional-verification' ? 'text-yellow-300' : ''}`}>Professional Verification</button>
-                </Link>
-
-                <Link to={`/professional-management`}>
-                    <button className={`hidden lg:flex font-semibold  w-full ${location.pathname === '/professional-management' ? 'text-yellow-300' : ''}`}>Professional Management</button>
-                </Link>
-                <Link to={`/manage-contact`}>
-                    <button className={`hidden lg:flex font-semibold  ${location.pathname === '/manage-contact' ? 'text-yellow-300' : ''}`}>Manage Contact Us Section</button>
-                </Link>
-
-
-                {user ? (
-                    <>
-                        <>
-                            <button onClick={handleSignOutUser}>
-                                <a className="px-2 py-1 lg:px-7 lg:py-3 font-semibold border-2 btn-outline bg-yellow-300 text-gray-700 border-yellow-300 hover:text-yellow-300 hover:bg-transparent hover:border-yellow-300 rounded-3xl text-xs sm:text-sm lg:text-lg">
-                                    Logout
-                                </a>
-                            </button>
-                        </>
-                    </>
-                ) : (
-                    <div className='flex content-center items-center justify-center space-x-1 lg:space-x-4'>
-                        <Link to={'/login'}>
-                            <a className="px-2 py-1 lg:px-7 lg:py-3 font-semibold border-2 btn-outline hover:bg-yellow-300 text-yellow-300 hover:text-gray-700 hover:border-yellow-300 rounded-3xl text-xs sm:text-sm lg:text-lg">Login</a>
-                        </Link>
-
+                {/* Desktop links (only useful once signed in) */}
+                {user && (
+                    <div className="hidden items-center gap-6 xl:flex">
+                        {NAV_LINKS.map(({ to, label, end }) => (
+                            <NavLink key={to} to={to} end={end} className={desktopLinkClass}>{label}</NavLink>
+                        ))}
                     </div>
                 )}
-            </div>
-        </div>
+
+                {/* Right side */}
+                <div className="flex shrink-0 items-center gap-2 lg:gap-3">
+                    {user ? (
+                        <div className="relative" ref={profileRef}>
+                            <button
+                                type="button"
+                                onClick={() => setIsProfileOpen((open) => !open)}
+                                aria-haspopup="true"
+                                aria-expanded={isProfileOpen}
+                                aria-label="Open account menu"
+                                className={`rounded-full ring-2 transition ${isProfileOpen ? 'ring-yellow-300' : 'ring-white/70 hover:ring-yellow-300'}`}
+                            >
+                                <Avatar user={user} size={40} />
+                            </button>
+                            {isProfileOpen && (
+                                <div className="absolute right-0 top-full mt-3 w-64 rounded-xl bg-white p-2 text-gray-700 shadow-lg">
+                                    <div className="flex items-center gap-3 px-3 py-2">
+                                        <Avatar user={user} size={40} />
+                                        <div className="min-w-0">
+                                            <p className="truncate font-semibold text-gray-900">{user.displayName || 'Administrator'}</p>
+                                            <p className="truncate text-sm text-gray-500">{user.email}</p>
+                                        </div>
+                                    </div>
+                                    <hr className="my-1 border-gray-200" />
+                                    <button
+                                        type="button"
+                                        onClick={handleSignOut}
+                                        className="block w-full rounded-lg px-3 py-2 text-left text-red-600 hover:bg-red-50"
+                                    >
+                                        Logout
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    ) : (
+                        <Link
+                            to="/login"
+                            className="whitespace-nowrap rounded-full border-2 border-yellow-300 bg-yellow-300 px-5 py-1.5 text-sm font-semibold text-gray-800 transition hover:bg-transparent hover:text-yellow-300 lg:px-6 lg:py-2 lg:text-base"
+                        >
+                            Login
+                        </Link>
+                    )}
+
+                    {user && (
+                        <button
+                            type="button"
+                            onClick={() => setIsMenuOpen((open) => !open)}
+                            aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
+                            aria-expanded={isMenuOpen}
+                            className="rounded-lg p-2 hover:bg-white/10 xl:hidden"
+                        >
+                            {isMenuOpen ? <HiX className="h-6 w-6" /> : <HiMenu className="h-6 w-6" />}
+                        </button>
+                    )}
+                </div>
+            </nav>
+
+            {/* Mobile / tablet menu */}
+            {user && isMenuOpen && (
+                <div className="border-t border-white/20 bg-white shadow-lg xl:hidden">
+                    <ul className="mx-auto max-w-7xl space-y-1 px-4 py-3">
+                        {NAV_LINKS.map(({ to, label, end }) => (
+                            <li key={to}><NavLink to={to} end={end} className={mobileLinkClass}>{label}</NavLink></li>
+                        ))}
+                    </ul>
+                </div>
+            )}
+        </header>
     );
 };
 
