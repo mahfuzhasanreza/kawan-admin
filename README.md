@@ -107,7 +107,7 @@ flowchart LR
 
     AD --> APP
     APP -->|"login"| FB
-    APP -->|"verification · professionals · contact"| KS
+    APP -->|"verification, professionals, contact"| KS
     KS --> DB
     APP -->|"user list"| KR
 
@@ -119,10 +119,10 @@ flowchart LR
 
 ```mermaid
 flowchart TB
-    M["main.jsx<br/>createBrowserRouter"] --> AP["AuthProvider<br/>(Firebase · userDb · guest login)"]
-    AP --> R["Root<br/>Navbar · Outlet · Footer"]
+    M["main.jsx<br/>createBrowserRouter"] --> AP["AuthProvider<br/>(Firebase, userDb, guest login)"]
+    AP --> R["Root<br/>Navbar, Outlet, Footer"]
     R --> H["Home → Banner + HomeContent (module cards)"]
-    R --> L["Login · Register"]
+    R --> L["Login, Register"]
     R --> PR{{"PrivateRoute"}}
     PR --> PV["Professional<br/>(verification queue)"]
     PR --> PM["ProfessionalManagement<br/>(verified list)"]
@@ -190,9 +190,9 @@ flowchart LR
 | Screen | Method & Endpoint | Service |
 |---|---|---|
 | Verification | `GET /req-professionals` | kawan-server |
-| Verification | `PUT /accept-professionals/:email` · `POST /professionals-manage` · `DELETE /req-professionals/:email` | kawan-server |
-| Management | `GET /verify-professionals-list` · `PUT /delete-professionals/:email` · `DELETE /professionals-manage/:email` | kawan-server |
-| Contact | `GET /contact` · `DELETE /contact/:email` | kawan-server |
+| Verification | `PUT /accept-professionals/:email`, `POST /professionals-manage`, `DELETE /req-professionals/:email` | kawan-server |
+| Management | `GET /verify-professionals-list`, `PUT /delete-professionals/:email`, `DELETE /professionals-manage/:email` | kawan-server |
+| Contact | `GET /contact`, `DELETE /contact/:email` | kawan-server |
 | Navbar / Banner | `GET /professionals/:email` (role badge) | kawan-server |
 | User list | `GET /api/v1/user` | KAWAN REST API |
 
@@ -213,16 +213,16 @@ kawan-admin/
 │   ├── providers/AuthProvider.jsx
 │   ├── routes/PrivateRoute.jsx
 │   └── components/
-│       ├── Home/ · HomeContent/ · Banner/ · HomeBtn/
-│       ├── Navbar/ · Footer/ · Root/ · ErrorPage/
-│       ├── Login/ · Register/
+│       ├── Home/, HomeContent/, Banner/, HomeBtn/
+│       ├── Navbar/, Footer/, Root/, ErrorPage/
+│       ├── Login/, Register/
 │       ├── Professional/Professional.jsx   # Verification queue
 │       ├── ProfessionalManagement.jsx      # Verified list / revoke
 │       ├── UserList.jsx
 │       └── ManageContact.jsx
 ├── vercel.json                      # SPA rewrite
-├── firebase.json · .firebaserc
-├── tailwind.config.js · vite.config.js · eslint.config.js
+├── firebase.json, .firebaserc
+├── tailwind.config.js, vite.config.js, eslint.config.js
 └── .npmrc                           # legacy-peer-deps=true
 ```
 
